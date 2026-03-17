@@ -5,8 +5,10 @@
   "bugs": {
     "url": "https://github.com/wordflow-studio/wordflow-datasets/issues"
   },
+  "dependencies": {
+    "commander": "^14.0.3"
+  },
   "description": "Repeatable dataset generation and seeding for WordPress sites.",
-  "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "2.4.6",
     "@changesets/cli": "^2.29.8",
@@ -32,6 +34,12 @@
     "dist"
   ],
   "homepage": "https://github.com/wordflow-studio/wordflow-datasets#readme",
+  "keywords": [
+    "cli",
+    "dataset",
+    "seeding",
+    "wordpress"
+  ],
   "license": "MIT",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -59,11 +67,5 @@
   },
   "type": "module",
   "types": "./dist/index.d.mts",
-  "version": "0.0.0",
-  "keywords": [
-    "wordpress",
-    "dataset",
-    "seeding",
-    "cli"
-  ]
+  "version": "0.0.0"
 }

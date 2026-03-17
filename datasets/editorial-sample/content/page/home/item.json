@@ -1,0 +1,10 @@
+{
+  "excerpt": "A simple landing page for the editorial sample dataset.",
+  "locale": "en-US",
+  "slug": "home",
+  "sourceRefs": ["editorial-team"],
+  "state": "published",
+  "taxonomyRefs": [],
+  "title": "Welcome to Wordflow",
+  "type": "page"
+}

@@ -1,3 +1,15 @@
-export function greet(name: string = 'World'): string {
-  return `Hello, ${name} from wordflow-dataset!`
-}
+export type {
+  ContentType,
+  DatasetItem,
+  DatasetManifest,
+  DatasetState,
+  SourceKind,
+  SourceRecord,
+  TaxonomyDefinition,
+  TaxonomyTerm,
+  TaxonomyType,
+  ValidationIssue,
+  ValidationReport,
+  ValidationStatus,
+} from './types.ts'
+export { validateDataset } from './validation.ts'

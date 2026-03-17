@@ -1,0 +1,10 @@
+{
+  "excerpt": "A short company update that exercises category and tag references.",
+  "locale": "en-US",
+  "slug": "company-update",
+  "sourceRefs": ["editorial-team"],
+  "state": "published",
+  "taxonomyRefs": ["category:company-news", "tag:platform"],
+  "title": "Wordflow ships its first portable dataset contract",
+  "type": "post"
+}
