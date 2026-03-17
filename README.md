@@ -1,74 +1,38 @@
 # wordflow-dataset
 
-This is a template for creating a modern TypeScript library or package using [Bun](https://bun.sh/). It comes pre-configured with essential tools for development, testing, linting, and publishing.
+`wordflow-dataset` is the package and CLI scaffold for the `wordflow-studio/wordflow-datasets` repo.
 
-## Features
+The repository is intended to hold tooling and datasets for repeatable WordPress site generation and seeding. Current status: early scaffold. The package metadata, build tooling, tests, and release flow are in place, but the dataset and seeding feature set is still to be built out.
 
-*   **Bun-first development**: Leverages Bun for lightning-fast installs, runs, and tests.
-*   **TypeScript support**: Write type-safe code from the start.
-*   **Linting & Formatting**: Enforced with [Biome](https://biomejs.dev/) for consistent code style.
-*   **Bundling**: Uses [tsdown](https://tsdown.js.org/) for efficient bundling into ESM and CJS formats, with type declarations.
-*   **Testing**: Built-in unit testing with `bun test`.
-*   **Versioning & Publishing**: Managed with [Changesets](https://github.com/changesets/changesets) for streamlined releases to npm.
-*   **GitHub Actions**: Continuous Integration (CI) workflows for automated build, test, lint, and publish processes.
+## Development
 
-## Getting Started
-
-To use this template, you typically would use a scaffolding tool like `bunx create-something -t wordflow-dataset`.
-
-### Installation
-
-If you're using this template directly (e.g., after cloning), you can install dependencies with Bun:
+Install dependencies with Bun:
 
 ```bash
 bun install
 ```
 
-### Development
+Common commands:
 
-*   **Build**: `bun run build`
-*   **Type Check**: `bun run check-types`
-*   **Lint**: `bun run lint`
-*   **Lint & Fix**: `bun run lint:fix`
-*   **Test**: `bun test`
-*   **Test (Watch Mode)**: `bun run test:watch`
+- `bun run build`
+- `bun run lint`
+- `bun run lint:fix`
+- `bun run check-types`
+- `bun test`
+- `bun run test:watch`
 
-### Publishing
+## Releases
 
-This template uses Changesets for versioning and publishing.
+This repo uses Changesets for versioning and npm publishing.
 
-1.  **Add a changeset**:
-    ```bash
-    bun changeset
-    ```
-    Follow the prompts to describe your changes. This will create a markdown file in `.changeset/`.
+1. Add a changeset with `bun run changeset`.
+2. Version the package with `bun run version`.
+3. Publish with `bun run release`.
 
-2.  **Version packages**:
-    ```bash
-    bun run version
-    ```
-    This command reads the changeset files, updates package versions, updates `CHANGELOG.md`, and deletes the used changeset files. It also runs `bun lint:fix`.
+## Status
 
-3.  **Publish to npm**:
-    ```bash
-    bun run release
-    ```
-    This command builds the package and publishes it to npm. Ensure you are logged into npm (`npm login`) or have `NPM_TOKEN` configured in your CI environment.
-
-## Project Structure
-
-```
-.
-├── src/             # Source code for your library
-│   └── index.ts     # Main entry point for your library
-├── test/            # Unit tests
-│   └── index.test.ts # Example test file
-├── tsdown.config.ts   # Configuration for tsdown (bundling)
-├── biome.json       # Biome linter/formatter configuration
-├── package.json     # Project metadata and scripts
-└── ... (other config files and GitHub workflows)
-```
+This README intentionally describes the project as it exists today. `wordflow-dataset` is not yet a complete dataset generation or WordPress seeding tool; it is an honest starting point for that work.
 
 ## License
 
-MIT – see [LICENSE](./LICENSE).
+MIT. See [LICENSE](./LICENSE).
