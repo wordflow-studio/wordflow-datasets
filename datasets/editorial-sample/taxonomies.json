@@ -1,0 +1,29 @@
+{
+  "terms": [
+    {
+      "name": "Community",
+      "slug": "community",
+      "taxonomy": "category"
+    },
+    {
+      "name": "Newsroom",
+      "slug": "newsroom",
+      "taxonomy": "category"
+    },
+    {
+      "name": "Behind the Scenes",
+      "slug": "behind-the-scenes",
+      "taxonomy": "tag"
+    },
+    {
+      "name": "Launch Week",
+      "slug": "launch-week",
+      "taxonomy": "tag"
+    },
+    {
+      "name": "Weekend Guide",
+      "slug": "weekend-guide",
+      "taxonomy": "tag"
+    }
+  ]
+}

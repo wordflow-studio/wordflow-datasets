@@ -1,0 +1,19 @@
+{
+  "terms": [
+    {
+      "name": "6.1",
+      "slug": "6-1",
+      "taxonomy": "category"
+    },
+    {
+      "name": "Block",
+      "slug": "block",
+      "taxonomy": "category"
+    },
+    {
+      "name": "Codex",
+      "slug": "codex",
+      "taxonomy": "tag"
+    }
+  ]
+}

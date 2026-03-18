@@ -1,0 +1,22 @@
+{
+  "sources": [
+    {
+      "id": "theme-test-data-readme",
+      "kind": "upstream",
+      "license": "Unknown",
+      "note": "Pinned upstream README for project provenance.",
+      "title": "WordPress Theme Test Data README",
+      "url": "https://raw.githubusercontent.com/WordPress/theme-test-data/b47acf980696897936265182cb684dca648476c7/README.md",
+      "version": "b47acf980696897936265182cb684dca648476c7"
+    },
+    {
+      "id": "theme-test-data-xml",
+      "kind": "upstream",
+      "license": "Unknown",
+      "note": "Pinned upstream XML source. This repo stores a reduced, normalized subset derived from that fixture.",
+      "title": "WordPress Theme Test Data XML",
+      "url": "https://raw.githubusercontent.com/WordPress/theme-test-data/b47acf980696897936265182cb684dca648476c7/themeunittestdata.wordpress.xml",
+      "version": "b47acf980696897936265182cb684dca648476c7"
+    }
+  ]
+}

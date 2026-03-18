@@ -1,0 +1,21 @@
+{
+  "bodyFormat": "markdown",
+  "excerpt": "The launch story for the editorial sample dataset.",
+  "featuredAssetId": "north-harbor-hero",
+  "id": "launch-weekend-market",
+  "kind": "article",
+  "locale": "en-US",
+  "slug": "launch-weekend-market",
+  "sourceIds": ["generated-copy"],
+  "summary": "Featured launch story with a local asset and taxonomy references.",
+  "targets": {
+    "wordpress": {
+      "status": "publish"
+    }
+  },
+  "taxonomySlugs": {
+    "category": ["community"],
+    "tag": ["launch-week", "weekend-guide"]
+  },
+  "title": "Launch Weekend at the Market"
+}

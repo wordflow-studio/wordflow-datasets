@@ -1,0 +1,18 @@
+{
+  "bodyFormat": "html",
+  "id": "keyboard-navigation",
+  "kind": "article",
+  "locale": "en-US",
+  "slug": "keyboard-navigation",
+  "sourceIds": ["theme-test-data-xml"],
+  "summary": "Accessibility-oriented article derived from the upstream keyboard navigation fixture.",
+  "targets": {
+    "wordpress": {
+      "status": "publish"
+    }
+  },
+  "taxonomySlugs": {
+    "tag": ["codex"]
+  },
+  "title": "Keyboard navigation"
+}

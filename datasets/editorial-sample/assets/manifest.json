@@ -1,0 +1,13 @@
+{
+  "assets": [
+    {
+      "altText": "Abstract harbor lines in blue and sand.",
+      "credit": "Generated placeholder artwork",
+      "filename": "north-harbor-hero.png",
+      "id": "north-harbor-hero",
+      "mimeType": "image/png",
+      "sourceIds": ["generated-graphic"],
+      "title": "North Harbor Hero"
+    }
+  ]
+}

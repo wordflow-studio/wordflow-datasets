@@ -1,0 +1,18 @@
+{
+  "bodyFormat": "html",
+  "id": "text-category-blocks",
+  "kind": "article",
+  "locale": "en-US",
+  "slug": "text-category-blocks",
+  "sourceIds": ["theme-test-data-xml"],
+  "summary": "Formatting-heavy article reduced from the upstream text category blocks fixture.",
+  "targets": {
+    "wordpress": {
+      "status": "publish"
+    }
+  },
+  "taxonomySlugs": {
+    "category": ["6-1", "block"]
+  },
+  "title": "WP 6.1 Text category blocks"
+}

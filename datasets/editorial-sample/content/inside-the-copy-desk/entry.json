@@ -1,0 +1,20 @@
+{
+  "bodyFormat": "markdown",
+  "excerpt": "A short look at how the sample newsroom keeps seeded content organized.",
+  "id": "inside-the-copy-desk",
+  "kind": "article",
+  "locale": "en-US",
+  "slug": "inside-the-copy-desk",
+  "sourceIds": ["generated-copy"],
+  "summary": "Behind-the-scenes editorial process story.",
+  "targets": {
+    "wordpress": {
+      "status": "publish"
+    }
+  },
+  "taxonomySlugs": {
+    "category": ["newsroom"],
+    "tag": ["behind-the-scenes"]
+  },
+  "title": "Inside the Copy Desk"
+}

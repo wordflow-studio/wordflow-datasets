@@ -1,0 +1,16 @@
+{
+  "bodyFormat": "markdown",
+  "id": "editorial-standards",
+  "kind": "page",
+  "locale": "en-US",
+  "parentId": "about",
+  "slug": "editorial-standards",
+  "sourceIds": ["generated-copy"],
+  "summary": "Child page used to verify parent page handling.",
+  "targets": {
+    "wordpress": {
+      "status": "publish"
+    }
+  },
+  "title": "Editorial Standards"
+}

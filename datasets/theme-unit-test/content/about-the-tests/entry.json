@@ -1,0 +1,15 @@
+{
+  "bodyFormat": "html",
+  "id": "about-the-tests",
+  "kind": "page",
+  "locale": "en-US",
+  "slug": "about",
+  "sourceIds": ["theme-test-data-readme", "theme-test-data-xml"],
+  "summary": "Pinned subset summary page for the WordPress Theme Test Data fixture.",
+  "targets": {
+    "wordpress": {
+      "status": "publish"
+    }
+  },
+  "title": "About The Tests"
+}

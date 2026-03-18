@@ -1,0 +1,8 @@
+{
+  "datasetVersion": "1.0.0",
+  "defaultLocale": "en-US",
+  "description": "Pinned subset of the upstream WordPress Theme Test Data project.",
+  "id": "theme-unit-test",
+  "label": "Theme Unit Test Subset",
+  "targets": ["wordpress"]
+}

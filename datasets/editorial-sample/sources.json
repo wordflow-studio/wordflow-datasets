@@ -1,0 +1,22 @@
+{
+  "sources": [
+    {
+      "id": "generated-copy",
+      "kind": "generated",
+      "license": "CC-BY-4.0",
+      "note": "Repository-authored sample copy for testing.",
+      "title": "Editorial Sample Copy",
+      "url": "https://github.com/wordflow-studio/wordflow-datasets",
+      "version": "repo"
+    },
+    {
+      "id": "generated-graphic",
+      "kind": "generated",
+      "license": "CC0-1.0",
+      "note": "In-repo placeholder PNG created for automated tests.",
+      "title": "Editorial Sample Hero Graphic",
+      "url": "https://github.com/wordflow-studio/wordflow-datasets",
+      "version": "repo"
+    }
+  ]
+}

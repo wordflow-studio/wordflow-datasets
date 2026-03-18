@@ -1,0 +1,5 @@
+{
+  "description": "A reduced subset of the WordPress Theme Test Data fixture for repeatable local testing.",
+  "title": "Theme Unit Test Data Subset",
+  "url": "https://wpthemetestdata.wordpress.com"
+}

@@ -12,6 +12,7 @@
     "@changesets/cli": "^2.29.8",
     "@intellectronica/ruler": "^0.3.34",
     "@types/bun": "^1.3.9",
+    "@wp-playground/cli": "^3.1.12",
     "pkg-pr-new": "^0.0.62",
     "publint": "^0.3.16",
     "tsdown": "^0.20.3"
@@ -29,7 +30,9 @@
     }
   },
   "files": [
-    "dist"
+    "datasets",
+    "dist",
+    "docs"
   ],
   "homepage": "https://github.com/wordflow-studio/wordflow-datasets#readme",
   "license": "MIT",
@@ -55,7 +58,9 @@
     "ruler:apply": "ruler apply --local-only",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "version": "changeset version && bun lint:fix"
+    "version": "changeset version && bun lint:fix",
+    "wp-playground": "wp-playground-cli server --mount-dir ./playground/mu-plugins /wordpress/wp-content/mu-plugins --verbosity debug",
+    "wp-playground-login": "wp-playground-cli server --login --mount-dir ./playground/mu-plugins /wordpress/wp-content/mu-plugins --verbosity debug"
   },
   "type": "module",
   "types": "./dist/index.d.mts",

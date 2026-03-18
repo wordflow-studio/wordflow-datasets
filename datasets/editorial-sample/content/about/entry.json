@@ -1,0 +1,15 @@
+{
+  "bodyFormat": "markdown",
+  "id": "about",
+  "kind": "page",
+  "locale": "en-US",
+  "slug": "about",
+  "sourceIds": ["generated-copy"],
+  "summary": "Overview page for the editorial sample dataset.",
+  "targets": {
+    "wordpress": {
+      "status": "publish"
+    }
+  },
+  "title": "About North Harbor Bulletin"
+}

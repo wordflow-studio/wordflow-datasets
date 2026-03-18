@@ -1,0 +1,8 @@
+{
+  "datasetVersion": "1.0.0",
+  "defaultLocale": "en-US",
+  "description": "Curated editorial sample with pages, posts, local assets, and provenance.",
+  "id": "editorial-sample",
+  "label": "Editorial Sample",
+  "targets": ["wordpress"]
+}
