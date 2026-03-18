@@ -1,0 +1,46 @@
+{
+  "taxonomies": [
+    {
+      "label": "Categories",
+      "slug": "category",
+      "terms": [
+        {
+          "label": "Block",
+          "slug": "block"
+        },
+        {
+          "label": "Classic",
+          "slug": "classic"
+        },
+        {
+          "label": "Markup",
+          "slug": "markup"
+        }
+      ],
+      "type": "category"
+    },
+    {
+      "label": "Tags",
+      "slug": "tag",
+      "terms": [
+        {
+          "label": "content περιεχόμενο",
+          "slug": "content"
+        },
+        {
+          "label": "css",
+          "slug": "css"
+        },
+        {
+          "label": "html",
+          "slug": "html"
+        },
+        {
+          "label": "title",
+          "slug": "title"
+        }
+      ],
+      "type": "tag"
+    }
+  ]
+}

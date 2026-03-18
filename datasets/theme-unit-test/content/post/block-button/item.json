@@ -1,0 +1,9 @@
+{
+  "locale": "en",
+  "slug": "block-button",
+  "sourceRefs": ["theme-test-data-xml"],
+  "state": "published",
+  "taxonomyRefs": ["category:block", "tag:content"],
+  "title": "Block: Button",
+  "type": "post"
+}

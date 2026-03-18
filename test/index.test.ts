@@ -7,6 +7,7 @@ import { validateDataset } from '../src/index.ts'
 const FIXTURE_PATH = resolve(import.meta.dir, '../datasets/editorial-sample')
 const REPO_ROOT = resolve(import.meta.dir, '..')
 const SHOULD_SKIP_PERMISSION_TESTS = process.platform === 'win32' || process.getuid?.() === 0
+const THEME_UNIT_TEST_PATH = resolve(import.meta.dir, '../datasets/theme-unit-test')
 const temporaryRoots: string[] = []
 
 afterEach(async () => {
@@ -47,6 +48,16 @@ test('validateDataset accepts the curated editorial sample', async () => {
 
   expect(report.errorCount).toBe(0)
   expect(report.itemCount).toBe(2)
+  expect(report.status).toBe('valid')
+  expect(report.valid).toBe(true)
+  expect(report.warningCount).toBe(0)
+})
+
+test('validateDataset accepts the normalized theme unit test subset', async () => {
+  const report = await validateDataset(THEME_UNIT_TEST_PATH)
+
+  expect(report.errorCount).toBe(0)
+  expect(report.itemCount).toBe(3)
   expect(report.status).toBe('valid')
   expect(report.valid).toBe(true)
   expect(report.warningCount).toBe(0)

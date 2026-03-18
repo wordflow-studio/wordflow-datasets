@@ -2,13 +2,13 @@
 
 `wordflow-dataset` defines and validates portable content datasets for Wordflow seeding workflows.
 
-The repository now contains the first portable dataset contract, validation tooling, and sample content for repeatable seeding workflows. WordPress-specific apply logic is intentionally deferred so the canonical dataset model stays portable.
+The repository now contains the first portable dataset contract, validation tooling, sample content for repeatable seeding workflows, and a narrow WordPress Playground smoke harness that proves portable datasets can be applied to fresh WordPress installs. The public WordPress apply CLI is still intentionally deferred so the canonical dataset model stays portable.
 
 ## What ships in v1
 
 - a documented dataset contract
+- fixture datasets in [`datasets/editorial-sample`](./datasets/editorial-sample) and [`datasets/theme-unit-test`](./datasets/theme-unit-test)
 - a portable validation library via `validateDataset(path)`
-- a sample curated dataset in [`datasets/editorial-sample`](./datasets/editorial-sample)
 - a validating CLI via `wordflow-dataset validate <path>`
 
 ## Quick start
@@ -33,6 +33,15 @@ bun run check-types
 bun run lint
 bun run test
 ```
+
+Run the internal WordPress apply smoke harness:
+
+```bash
+bun run wp:smoke:editorial-sample
+bun run wp:smoke:theme-unit-test
+```
+
+These smoke commands use the WordPress Playground CLI and download a fresh WordPress runtime the first time they run.
 
 ## Dataset layout
 

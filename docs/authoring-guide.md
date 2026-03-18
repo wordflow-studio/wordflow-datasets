@@ -49,6 +49,8 @@ Each content item lives in `content/<type>/<slug>/` and must contain:
 - `body.md`
 - `item.json`
 
+`body.md` may contain Markdown, raw HTML, or WordPress block markup when preserving upstream fixture content.
+
 `item.json` uses these required fields:
 
 - `locale`

@@ -1,0 +1,9 @@
+{
+  "locale": "en",
+  "slug": "markup-title-with-markup",
+  "sourceRefs": ["theme-test-data-xml"],
+  "state": "published",
+  "taxonomyRefs": ["category:classic", "category:markup", "tag:css", "tag:html", "tag:title"],
+  "title": "Markup: Title <em>With</em> <b>Mark<sup>up</sup></b>",
+  "type": "post"
+}

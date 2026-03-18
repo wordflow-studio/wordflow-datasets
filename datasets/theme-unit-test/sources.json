@@ -1,0 +1,20 @@
+{
+  "sources": [
+    {
+      "author": "WordPress",
+      "id": "theme-test-data-readme",
+      "kind": "text",
+      "license": "Upstream repository does not declare a license",
+      "name": "Theme Test Data README",
+      "originalUrl": "https://raw.githubusercontent.com/WordPress/theme-test-data/b47acf980696897936265182cb684dca648476c7/README.md"
+    },
+    {
+      "author": "WordPress",
+      "id": "theme-test-data-xml",
+      "kind": "mixed",
+      "license": "Upstream repository does not declare a license",
+      "name": "Theme Unit Test XML export",
+      "originalUrl": "https://raw.githubusercontent.com/WordPress/theme-test-data/b47acf980696897936265182cb684dca648476c7/themeunittestdata.wordpress.xml"
+    }
+  ]
+}

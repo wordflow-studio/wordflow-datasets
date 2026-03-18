@@ -115,6 +115,7 @@ Optional fields:
 Rules:
 
 - `body.md` is required for every content item
+- `body.md` may contain Markdown, raw HTML, or WordPress block markup as plain text
 - `featuredAsset`, when present, must point to a file inside the dataset directory
 - `sourceRefs` entries must exist in `sources.json`
 - `taxonomyRefs` entries must exist in `taxonomies.json`
@@ -131,4 +132,4 @@ Rules:
 - slug, locale, and URL formats
 - reference resolution for assets, sources, and taxonomies
 
-WordPress-specific apply rules are intentionally out of scope for v1.
+The public WordPress apply contract is intentionally out of scope for v1. This repo only includes a narrow internal WordPress smoke harness for repeatable apply checks.

@@ -1,0 +1,9 @@
+{
+  "locale": "en",
+  "slug": "about",
+  "sourceRefs": ["theme-test-data-xml"],
+  "state": "published",
+  "taxonomyRefs": [],
+  "title": "About The Tests",
+  "type": "page"
+}
