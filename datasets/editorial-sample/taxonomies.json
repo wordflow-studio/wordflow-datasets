@@ -1,0 +1,26 @@
+{
+  "taxonomies": [
+    {
+      "label": "Categories",
+      "slug": "category",
+      "terms": [
+        {
+          "label": "Company News",
+          "slug": "company-news"
+        }
+      ],
+      "type": "category"
+    },
+    {
+      "label": "Tags",
+      "slug": "tag",
+      "terms": [
+        {
+          "label": "Platform",
+          "slug": "platform"
+        }
+      ],
+      "type": "tag"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "$defs": {
+    "source": {
+      "additionalProperties": false,
+      "properties": {
+        "author": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "type": "string"
+        },
+        "kind": {
+          "enum": ["image", "mixed", "other", "text"],
+          "type": "string"
+        },
+        "license": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "originalUrl": {
+          "pattern": "^https?://\\S+$",
+          "type": "string"
+        }
+      },
+      "required": ["id", "kind", "license", "name"],
+      "type": "object"
+    }
+  },
+  "$id": "https://wordflow.studio/schemas/sources.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/source"
+      },
+      "type": "array"
+    }
+  },
+  "required": ["sources"],
+  "type": "object"
+}

@@ -1,0 +1,7 @@
+{
+  "description": "A small curated dataset for validating the portable v1 Wordflow dataset contract.",
+  "locale": "en-US",
+  "schemaVersion": "1.0.0",
+  "slug": "editorial-sample",
+  "title": "Editorial Sample"
+}

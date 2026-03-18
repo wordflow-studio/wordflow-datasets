@@ -1,0 +1,57 @@
+{
+  "$defs": {
+    "taxonomy": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "slug": {
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "type": "string"
+        },
+        "terms": {
+          "items": {
+            "$ref": "#/$defs/term"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": ["category", "custom", "tag"],
+          "type": "string"
+        }
+      },
+      "required": ["label", "slug", "terms", "type"],
+      "type": "object"
+    },
+    "term": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "slug": {
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "type": "string"
+        }
+      },
+      "required": ["label", "slug"],
+      "type": "object"
+    }
+  },
+  "$id": "https://wordflow.studio/schemas/taxonomies.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "taxonomies": {
+      "items": {
+        "$ref": "#/$defs/taxonomy"
+      },
+      "type": "array"
+    }
+  },
+  "required": ["taxonomies"],
+  "type": "object"
+}

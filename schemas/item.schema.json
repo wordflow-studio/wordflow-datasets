@@ -1,0 +1,52 @@
+{
+  "$id": "https://wordflow.studio/schemas/item.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "excerpt": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "featuredAsset": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "locale": {
+      "minLength": 2,
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$",
+      "type": "string"
+    },
+    "slug": {
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "sourceRefs": {
+      "items": {
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "state": {
+      "enum": ["draft", "published"],
+      "type": "string"
+    },
+    "taxonomyRefs": {
+      "items": {
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*:[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "type": {
+      "enum": ["page", "post"],
+      "type": "string"
+    }
+  },
+  "required": ["locale", "slug", "sourceRefs", "state", "taxonomyRefs", "title", "type"],
+  "type": "object"
+}
