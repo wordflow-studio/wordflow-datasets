@@ -66,6 +66,7 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "version": "changeset version && bun lint:fix",
+    "wp:playground": "bun run ./scripts/wordpress-playground.ts",
     "wp:smoke:editorial-sample": "bun run ./scripts/wordpress-apply-smoke.ts datasets/editorial-sample",
     "wp:smoke:theme-unit-test": "bun run ./scripts/wordpress-apply-smoke.ts datasets/theme-unit-test"
   },

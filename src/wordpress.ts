@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { marked } from 'marked'
 import type { ContentType, DatasetItem, DatasetManifest, TaxonomyDefinition, TaxonomyType } from './types.ts'
@@ -19,10 +19,24 @@ const DEFAULT_MENU_ORDER = 0
 const DEFAULT_PING_STATUS = 'closed'
 const DEFAULT_POST_PARENT = 0
 const EXPECTED_BLUEPRINT_FILENAME = 'blueprint.json'
+const EXPECTED_WORDPRESS_IMPORTER_FILENAME = 'wordpress-importer.zip'
 const EXPECTED_WXR_FILENAME = 'dataset.wxr'
+const EXPECTED_WXR_PLAYGROUND_PATH = '/tmp/wordflow-dataset.wxr'
 const PREFERRED_PHP_VERSION = '8.3'
-const PREFERRED_WORDPRESS_VERSION = '6.9'
+const PREFERRED_WORDPRESS_VERSION = '6.9.4'
 const SUPPORTED_TAXONOMY_TYPES = new Set<TaxonomyType>(['category', 'tag'])
+const WORDPRESS_CACHE_DIRECTORY_PATH = resolve(import.meta.dir, '../.cache/wordpress')
+const WORDPRESS_CORE_RELEASE_URL = 'https://wordpress.org/wordpress-6.9.4.zip'
+const WORDPRESS_CORE_VERSION = '6.9.4'
+const WORDPRESS_IMPORTER_RELEASE_URL = 'https://downloads.wordpress.org/plugin/wordpress-importer.0.9.5.zip'
+const WORDPRESS_IMPORTER_VERSION = '0.9.5'
+
+type XmlChild = XmlNode | XmlRaw | string
+
+interface CreateWordPressSmokeBundleOptions {
+  importerZipPath: string
+  wordpressVersion: string
+}
 
 interface DatasetSourcesDocument {
   sources: Array<{
@@ -77,6 +91,23 @@ interface WordPressSmokeSpecification {
   }
 }
 
+interface WordPressSmokeAssets {
+  importerZipPath: string
+  wordpressVersion: string
+  wordpressZipPath: string
+}
+
+interface XmlNode {
+  attributes?: Record<string, string>
+  children?: XmlChild[]
+  name: string
+}
+
+interface XmlRaw {
+  kind: 'raw'
+  value: string
+}
+
 function cdata(value: string): string {
   return `<![CDATA[${value.replaceAll(']]>', ']]]]><![CDATA[>')}]]>`
 }
@@ -103,6 +134,65 @@ function formatWordPressDate(date: Date): string {
   const seconds = String(date.getUTCSeconds()).padStart(2, '0')
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+function xmlRaw(value: string): XmlRaw {
+  return {
+    kind: 'raw',
+    value,
+  }
+}
+
+function xmlNode(name: string, children?: XmlChild[], attributes?: Record<string, string>): XmlNode {
+  return {
+    attributes,
+    children,
+    name,
+  }
+}
+
+function renderXmlChildInline(child: XmlChild): string {
+  if (typeof child === 'string') {
+    return escapeXml(child)
+  }
+
+  if ('kind' in child) {
+    return child.value
+  }
+
+  return renderXmlNode(child, 0)
+}
+
+function renderXmlNode(node: XmlNode, indentationLevel: number): string {
+  const attributes = Object.entries(node.attributes ?? {})
+    .sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey))
+    .map(([key, value]) => ` ${key}="${escapeXml(value)}"`)
+    .join('')
+  const indentation = '\t'.repeat(indentationLevel)
+
+  if (!node.children || node.children.length === 0) {
+    return `${indentation}<${node.name}${attributes}/>`
+  }
+
+  const hasNestedNodes = node.children.some((child) => typeof child !== 'string' && !('kind' in child))
+
+  if (!hasNestedNodes) {
+    const content = node.children.map((child) => renderXmlChildInline(child)).join('')
+
+    return `${indentation}<${node.name}${attributes}>${content}</${node.name}>`
+  }
+
+  return [
+    `${indentation}<${node.name}${attributes}>`,
+    ...node.children.map((child) => {
+      if (typeof child === 'string' || 'kind' in child) {
+        return `${'\t'.repeat(indentationLevel + 1)}${renderXmlChildInline(child)}`
+      }
+
+      return renderXmlNode(child, indentationLevel + 1)
+    }),
+    `${indentation}</${node.name}>`,
+  ].join('\n')
 }
 
 function getBaseSiteUrl(datasetSlug: string): string {
@@ -157,9 +247,35 @@ function sortTaxonomyTerms(terms: LoadedWordPressTaxonomyTerm[]): LoadedWordPres
   })
 }
 
+async function downloadFile(url: string, destinationPath: string): Promise<void> {
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`Failed to download ${url}: ${response.status} ${response.statusText}`)
+  }
+
+  await writeFile(destinationPath, Buffer.from(await response.arrayBuffer()))
+}
+
 async function readJsonFile<T>(filePath: string): Promise<T> {
   const contents = await readFile(filePath, 'utf8')
   return JSON.parse(contents) as T
+}
+
+async function ensureFileExists(filePath: string): Promise<void> {
+  try {
+    const fileStats = await stat(filePath)
+
+    if (!fileStats.isFile()) {
+      throw new Error(`Expected a file at ${filePath}.`)
+    }
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+      throw new Error(`Expected a file at ${filePath}.`)
+    }
+
+    throw error
+  }
 }
 
 async function readValidatedDataset(datasetPath: string): Promise<LoadedWordPressDataset> {
@@ -278,7 +394,7 @@ async function readValidatedDataset(datasetPath: string): Promise<LoadedWordPres
   }
 }
 
-function renderTopLevelTaxonomyTerms(items: LoadedWordPressDatasetItem[]): string[] {
+function renderTopLevelTaxonomyTerms(items: LoadedWordPressDatasetItem[]): XmlNode[] {
   const uniqueTerms = new Map<string, LoadedWordPressTaxonomyTerm>()
 
   for (const item of items) {
@@ -293,62 +409,57 @@ function renderTopLevelTaxonomyTerms(items: LoadedWordPressDatasetItem[]): strin
       const termId = index + 1
 
       if (term.type === 'category') {
-        return [
-          '<wp:category>',
-          `\t<wp:term_id>${termId}</wp:term_id>`,
-          `\t<wp:category_nicename>${cdata(term.slug)}</wp:category_nicename>`,
-          `\t<wp:category_parent>${cdata('')}</wp:category_parent>`,
-          `\t<wp:cat_name>${cdata(term.label)}</wp:cat_name>`,
-          '</wp:category>',
-        ].join('\n')
+        return xmlNode('wp:category', [
+          xmlNode('wp:term_id', [String(termId)]),
+          xmlNode('wp:category_nicename', [xmlRaw(cdata(term.slug))]),
+          xmlNode('wp:category_parent', [xmlRaw(cdata(''))]),
+          xmlNode('wp:cat_name', [xmlRaw(cdata(term.label))]),
+        ])
       }
 
-      return [
-        '<wp:tag>',
-        `\t<wp:term_id>${termId}</wp:term_id>`,
-        `\t<wp:tag_slug>${cdata(term.slug)}</wp:tag_slug>`,
-        `\t<wp:tag_name>${cdata(term.label)}</wp:tag_name>`,
-        '</wp:tag>',
-      ].join('\n')
+      return xmlNode('wp:tag', [
+        xmlNode('wp:term_id', [String(termId)]),
+        xmlNode('wp:tag_slug', [xmlRaw(cdata(term.slug))]),
+        xmlNode('wp:tag_name', [xmlRaw(cdata(term.label))]),
+      ])
     })
 }
 
-function renderWordPressItem(item: LoadedWordPressDatasetItem, datasetSlug: string, index: number): string {
+function renderWordPressItem(item: LoadedWordPressDatasetItem, datasetSlug: string, index: number): XmlNode {
   const baseSiteUrl = getBaseSiteUrl(datasetSlug)
   const link = `${baseSiteUrl}/${item.slug}/`
   const postDate = new Date(CHANNEL_PUB_DATE)
 
   postDate.setUTCDate(CHANNEL_PUB_DATE.getUTCDate() + index)
 
-  const taxonomyReferences = item.taxonomyTerms.map((term) => {
-    return `<category domain="${getWordPressTaxonomyName(term.type)}" nicename="${escapeXml(term.slug)}">${cdata(term.label)}</category>`
-  })
-
-  return [
-    '<item>',
-    `\t<title>${cdata(item.title)}</title>`,
-    `\t<link>${escapeXml(link)}</link>`,
-    `\t<pubDate>${formatPubDate(postDate)}</pubDate>`,
-    `\t<dc:creator>${cdata(CHANNEL_AUTHOR_LOGIN)}</dc:creator>`,
-    `\t<guid isPermaLink="false">${escapeXml(`${baseSiteUrl}/?p=${index + 1}`)}</guid>`,
-    '\t<description/>',
-    `\t<content:encoded>${cdata(item.content)}</content:encoded>`,
-    `\t<excerpt:encoded>${cdata(item.excerpt)}</excerpt:encoded>`,
-    `\t<wp:post_id>${index + 1}</wp:post_id>`,
-    `\t<wp:post_date>${formatWordPressDate(postDate)}</wp:post_date>`,
-    `\t<wp:post_date_gmt>${formatWordPressDate(postDate)}</wp:post_date_gmt>`,
-    `\t<wp:comment_status>${DEFAULT_COMMENT_STATUS}</wp:comment_status>`,
-    `\t<wp:ping_status>${DEFAULT_PING_STATUS}</wp:ping_status>`,
-    `\t<wp:post_name>${cdata(item.slug)}</wp:post_name>`,
-    `\t<wp:status>${item.state === 'published' ? 'publish' : 'draft'}</wp:status>`,
-    `\t<wp:post_parent>${DEFAULT_POST_PARENT}</wp:post_parent>`,
-    `\t<wp:menu_order>${DEFAULT_MENU_ORDER}</wp:menu_order>`,
-    `\t<wp:post_type>${item.type}</wp:post_type>`,
-    '\t<wp:post_password/>',
-    '\t<wp:is_sticky>0</wp:is_sticky>',
-    ...taxonomyReferences.map((taxonomyReference) => `\t${taxonomyReference}`),
-    '</item>',
-  ].join('\n')
+  return xmlNode('item', [
+    xmlNode('title', [xmlRaw(cdata(item.title))]),
+    xmlNode('link', [link]),
+    xmlNode('pubDate', [formatPubDate(postDate)]),
+    xmlNode('dc:creator', [xmlRaw(cdata(CHANNEL_AUTHOR_LOGIN))]),
+    xmlNode('guid', [`${baseSiteUrl}/?p=${index + 1}`], { isPermaLink: 'false' }),
+    xmlNode('description'),
+    xmlNode('content:encoded', [xmlRaw(cdata(item.content))]),
+    xmlNode('excerpt:encoded', [xmlRaw(cdata(item.excerpt))]),
+    xmlNode('wp:post_id', [String(index + 1)]),
+    xmlNode('wp:post_date', [formatWordPressDate(postDate)]),
+    xmlNode('wp:post_date_gmt', [formatWordPressDate(postDate)]),
+    xmlNode('wp:comment_status', [DEFAULT_COMMENT_STATUS]),
+    xmlNode('wp:ping_status', [DEFAULT_PING_STATUS]),
+    xmlNode('wp:post_name', [xmlRaw(cdata(item.slug))]),
+    xmlNode('wp:status', [item.state === 'published' ? 'publish' : 'draft']),
+    xmlNode('wp:post_parent', [String(DEFAULT_POST_PARENT)]),
+    xmlNode('wp:menu_order', [String(DEFAULT_MENU_ORDER)]),
+    xmlNode('wp:post_type', [item.type]),
+    xmlNode('wp:post_password'),
+    xmlNode('wp:is_sticky', ['0']),
+    ...item.taxonomyTerms.map((term) =>
+      xmlNode('category', [xmlRaw(cdata(term.label))], {
+        domain: getWordPressTaxonomyName(term.type),
+        nicename: term.slug,
+      }),
+    ),
+  ])
 }
 
 function buildSmokeSpecification(dataset: LoadedWordPressDataset): WordPressSmokeSpecification {
@@ -443,13 +554,41 @@ function renderSmokeAssertionPhp(dataset: LoadedWordPressDataset): string {
   ].join('\n')
 }
 
-function renderSmokeBlueprint(dataset: LoadedWordPressDataset): string {
+function renderSmokeImportPhp(): string {
+  return [
+    '<?php',
+    "require_once '/wordpress/wp-load.php';",
+    "if (!defined('WP_LOAD_IMPORTERS')) {",
+    "\tdefine('WP_LOAD_IMPORTERS', true);",
+    '}',
+    "if (!defined('WP_IMPORTING')) {",
+    "\tdefine('WP_IMPORTING', true);",
+    '}',
+    'wp_set_current_user(1);',
+    "require_once ABSPATH . 'wp-admin/includes/post.php';",
+    "require_once ABSPATH . 'wp-admin/includes/taxonomy.php';",
+    "require_once WP_PLUGIN_DIR . '/wordpress-importer/wordpress-importer.php';",
+    "if (!class_exists('WP_Import')) {",
+    "\tthrow new Exception('WordPress importer class is unavailable.');",
+    '}',
+    '$importer = new WP_Import();',
+    '$importer->fetch_attachments = false;',
+    'ob_start();',
+    `$importer->import('${EXPECTED_WXR_PLAYGROUND_PATH}', ['rewrite_urls' => false]);`,
+    '$output = ob_get_clean();',
+    "if (is_string($output) && str_contains($output, 'Sorry, there has been an error.')) {",
+    "\tthrow new Exception('WordPress importer reported an error.');",
+    '}',
+  ].join('\n')
+}
+
+function renderSmokeBlueprint(dataset: LoadedWordPressDataset, wordpressVersion: string): string {
   return JSON.stringify(
     {
       $schema: CHANNEL_SCHEMA_URL,
       preferredVersions: {
         php: PREFERRED_PHP_VERSION,
-        wp: PREFERRED_WORDPRESS_VERSION,
+        wp: wordpressVersion,
       },
       steps: [
         {
@@ -460,12 +599,27 @@ function renderSmokeBlueprint(dataset: LoadedWordPressDataset): string {
           step: 'setSiteOptions',
         },
         {
-          file: {
+          data: {
             path: EXPECTED_WXR_FILENAME,
             resource: 'bundled',
           },
-          importer: 'data-liberation',
-          step: 'importWxr',
+          path: EXPECTED_WXR_PLAYGROUND_PATH,
+          step: 'writeFile',
+        },
+        {
+          options: {
+            activate: false,
+            targetFolderName: 'wordpress-importer',
+          },
+          pluginData: {
+            path: EXPECTED_WORDPRESS_IMPORTER_FILENAME,
+            resource: 'bundled',
+          },
+          step: 'installPlugin',
+        },
+        {
+          code: renderSmokeImportPhp(),
+          step: 'runPHP',
         },
         {
           code: renderSmokeAssertionPhp(dataset),
@@ -478,22 +632,64 @@ function renderSmokeBlueprint(dataset: LoadedWordPressDataset): string {
   )
 }
 
-export async function createWordPressSmokeBundle(datasetPath: string, outputDirectoryPath: string) {
+export async function ensureWordPressSmokeAssets(): Promise<WordPressSmokeAssets> {
+  const importerZipPath = join(WORDPRESS_CACHE_DIRECTORY_PATH, `wordpress-importer.${WORDPRESS_IMPORTER_VERSION}.zip`)
+  const wordpressZipPath = join(WORDPRESS_CACHE_DIRECTORY_PATH, `wordpress-${WORDPRESS_CORE_VERSION}.zip`)
+  const assetsToEnsure = [
+    {
+      filePath: importerZipPath,
+      url: WORDPRESS_IMPORTER_RELEASE_URL,
+    },
+    {
+      filePath: wordpressZipPath,
+      url: WORDPRESS_CORE_RELEASE_URL,
+    },
+  ].sort((left, right) => left.filePath.localeCompare(right.filePath))
+
+  await mkdir(WORDPRESS_CACHE_DIRECTORY_PATH, {
+    recursive: true,
+  })
+
+  await Promise.all(
+    assetsToEnsure.map(async ({ filePath, url }) => {
+      try {
+        await ensureFileExists(filePath)
+      } catch {
+        await downloadFile(url, filePath)
+      }
+    }),
+  )
+
+  return {
+    importerZipPath,
+    wordpressVersion: PREFERRED_WORDPRESS_VERSION,
+    wordpressZipPath,
+  }
+}
+
+export async function createWordPressSmokeBundle(
+  datasetPath: string,
+  outputDirectoryPath: string,
+  options: CreateWordPressSmokeBundleOptions,
+) {
   const dataset = await readValidatedDataset(datasetPath)
   const absoluteOutputDirectoryPath = resolve(outputDirectoryPath)
   const blueprintPath = join(absoluteOutputDirectoryPath, EXPECTED_BLUEPRINT_FILENAME)
+  const wordpressImporterPath = join(absoluteOutputDirectoryPath, EXPECTED_WORDPRESS_IMPORTER_FILENAME)
   const wxrPath = join(absoluteOutputDirectoryPath, EXPECTED_WXR_FILENAME)
 
   await mkdir(absoluteOutputDirectoryPath, {
     recursive: true,
   })
   await Promise.all([
-    writeFile(blueprintPath, `${renderSmokeBlueprint(dataset)}\n`),
+    copyFile(options.importerZipPath, wordpressImporterPath),
+    writeFile(blueprintPath, `${renderSmokeBlueprint(dataset, options.wordpressVersion)}\n`),
     writeFile(wxrPath, await createWordPressWxr(datasetPath)),
   ])
 
   return {
     blueprintPath,
+    wordpressImporterPath,
     wxrPath,
   }
 }
@@ -506,27 +702,41 @@ export async function createWordPressWxr(datasetPath: string): Promise<string> {
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<rss version="2.0" xmlns:excerpt="https://wordpress.org/export/1.2/excerpt/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:wfw="http://wellformedweb.org/CommentAPI/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:wp="https://wordpress.org/export/1.2/">',
-    '\t<channel>',
-    `\t\t<title>${escapeXml(dataset.title)}</title>`,
-    `\t\t<link>${escapeXml(baseSiteUrl)}</link>`,
-    `\t\t<description>${escapeXml(dataset.description)}</description>`,
-    `\t\t<pubDate>${formatPubDate(CHANNEL_PUB_DATE)}</pubDate>`,
-    `\t\t<language>${escapeXml(getChannelLanguage(dataset.locale))}</language>`,
-    `\t\t<wp:wxr_version>${CHANNEL_WXR_VERSION}</wp:wxr_version>`,
-    `\t\t<wp:base_site_url>${escapeXml(baseSiteUrl)}</wp:base_site_url>`,
-    `\t\t<wp:base_blog_url>${escapeXml(baseSiteUrl)}</wp:base_blog_url>`,
-    '\t\t<wp:author>',
-    `\t\t\t<wp:author_login>${cdata(CHANNEL_AUTHOR_LOGIN)}</wp:author_login>`,
-    `\t\t\t<wp:author_email>${cdata(CHANNEL_AUTHOR_EMAIL)}</wp:author_email>`,
-    `\t\t\t<wp:author_display_name>${cdata(CHANNEL_AUTHOR_DISPLAY_NAME)}</wp:author_display_name>`,
-    `\t\t\t<wp:author_first_name>${cdata('Wordflow')}</wp:author_first_name>`,
-    `\t\t\t<wp:author_last_name>${cdata('Dataset')}</wp:author_last_name>`,
-    '\t\t</wp:author>',
-    ...topLevelTerms.map((term) => `\t\t${term}`),
-    ...renderedItems.map((item) => `\t\t${item.split('\n').join('\n\t\t')}`),
-    '\t</channel>',
-    '</rss>',
+    renderXmlNode(
+      xmlNode(
+        'rss',
+        [
+          xmlNode('channel', [
+            xmlNode('title', [dataset.title]),
+            xmlNode('link', [baseSiteUrl]),
+            xmlNode('description', [dataset.description]),
+            xmlNode('pubDate', [formatPubDate(CHANNEL_PUB_DATE)]),
+            xmlNode('language', [getChannelLanguage(dataset.locale)]),
+            xmlNode('wp:wxr_version', [CHANNEL_WXR_VERSION]),
+            xmlNode('wp:base_site_url', [baseSiteUrl]),
+            xmlNode('wp:base_blog_url', [baseSiteUrl]),
+            xmlNode('wp:author', [
+              xmlNode('wp:author_login', [xmlRaw(cdata(CHANNEL_AUTHOR_LOGIN))]),
+              xmlNode('wp:author_email', [xmlRaw(cdata(CHANNEL_AUTHOR_EMAIL))]),
+              xmlNode('wp:author_display_name', [xmlRaw(cdata(CHANNEL_AUTHOR_DISPLAY_NAME))]),
+              xmlNode('wp:author_first_name', [xmlRaw(cdata('Wordflow'))]),
+              xmlNode('wp:author_last_name', [xmlRaw(cdata('Dataset'))]),
+            ]),
+            ...topLevelTerms,
+            ...renderedItems,
+          ]),
+        ],
+        {
+          version: '2.0',
+          'xmlns:content': 'http://purl.org/rss/1.0/modules/content/',
+          'xmlns:dc': 'http://purl.org/dc/elements/1.1/',
+          'xmlns:excerpt': 'https://wordpress.org/export/1.2/excerpt/',
+          'xmlns:wfw': 'http://wellformedweb.org/CommentAPI/',
+          'xmlns:wp': 'https://wordpress.org/export/1.2/',
+        },
+      ),
+      0,
+    ),
     '',
   ].join('\n')
 }
