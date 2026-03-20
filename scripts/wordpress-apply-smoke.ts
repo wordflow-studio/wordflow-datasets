@@ -4,7 +4,8 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join, resolve } from 'node:path'
 import { argv, env, exitCode } from 'node:process'
-import { createWordPressSmokeBundle } from '../src/wordpress.ts'
+import { createWordPressSmokeBundle, ensureWordPressSmokeAssets } from '../src/wordpress.ts'
+import { getWordPressPreInstallArgs, unzipWordPress } from './wordpress-helpers.ts'
 
 const EXIT_FAILURE = 1
 const EXIT_SUCCESS = 0
@@ -26,11 +27,17 @@ async function main() {
   let shouldCleanup = true
 
   try {
-    const { blueprintPath } = await createWordPressSmokeBundle(datasetPath, temporaryRoot)
+    const assets = await ensureWordPressSmokeAssets()
+    const wordpressPath = await unzipWordPress(assets.wordpressZipPath, temporaryRoot)
+    const { blueprintPath } = await createWordPressSmokeBundle(datasetPath, temporaryRoot, {
+      importerZipPath: assets.importerZipPath,
+      wordpressVersion: assets.wordpressVersion,
+    })
     const childProcess = Bun.spawn({
       cmd: [
         cliPath,
         'run-blueprint',
+        ...getWordPressPreInstallArgs(wordpressPath),
         '--blueprint',
         blueprintPath,
         '--blueprint-may-read-adjacent-files',
